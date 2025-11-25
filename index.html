@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>BNO Random Walk</title>
+    <title>Random Walk GIF - Bigger Hitbox</title>
     <style>
         body {
             margin: 0;
@@ -12,12 +12,17 @@
             cursor: pointer;
         }
 
-        .bno {
+        .bno-wrapper {
             position: absolute;
-            width: 80px;
-            height: auto;
             pointer-events: auto;
             user-select: none;
+        }
+
+        .bno {
+            width: 80px;
+            height: auto;
+            display: block;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -26,10 +31,16 @@
 
     <script>
         function createBno(x, y) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "bno-wrapper";
+
             const img = document.createElement("img");
             img.src = "assets/walk.gif";
             img.className = "bno";
-            document.body.appendChild(img);
+            wrapper.appendChild(img);
+            document.body.appendChild(wrapper);
+
+            const hitboxPadding = 20;
 
             let posX = x;
             let posY = y;
@@ -37,35 +48,53 @@
             const speed = 10;
             const interval = 50 + Math.random() * 50;
 
+            function layout() {
+                const w = img.offsetWidth + hitboxPadding * 2;
+                const h = img.offsetHeight + hitboxPadding * 2;
+
+                wrapper.style.width = w + "px";
+                wrapper.style.height = h + "px";
+
+                // GIF 置中
+                img.style.position = "absolute";
+                img.style.left = hitboxPadding + "px";
+                img.style.top = hitboxPadding + "px";
+
+                wrapper.style.left = posX + "px";
+                wrapper.style.top = posY + "px";
+            }
+
             function move() {
                 const angle = Math.random() * Math.PI * 2;
                 const dx = Math.cos(angle) * speed;
                 const dy = Math.sin(angle) * speed;
+
                 posX += dx;
                 posY += dy;
 
-                const w = img.offsetWidth;
-                const h = img.offsetHeight;
+                const w = wrapper.offsetWidth;
+                const h = wrapper.offsetHeight;
 
                 if (posX < 0) posX = 0;
                 if (posY < 0) posY = 0;
                 if (posX + w > window.innerWidth) posX = window.innerWidth - w;
                 if (posY + h > window.innerHeight) posY = window.innerHeight - h;
 
-                img.style.left = posX + "px";
-                img.style.top = posY + "px";
+                wrapper.style.left = posX + "px";
+                wrapper.style.top = posY + "px";
             }
 
-            img.style.left = posX + "px";
-            img.style.top = posY + "px";
+            layout();
 
             const timer = setInterval(move, interval);
 
-            img.addEventListener("click", (e) => {
+            wrapper.addEventListener("click", (e) => {
                 e.stopPropagation();
                 clearInterval(timer);
-                img.remove();
+                wrapper.remove();
             });
+
+            img.onload = layout;
         }
 
         document.addEventListener("click", (event) => {
@@ -76,11 +105,11 @@
         createBno(window.innerWidth / 2, window.innerHeight / 2);
 
         window.addEventListener("resize", () => {
-            document.querySelectorAll(".bno").forEach(img => {
-                const x = Math.min(parseInt(img.style.left), window.innerWidth - img.offsetWidth);
-                const y = Math.min(parseInt(img.style.top), window.innerHeight - img.offsetHeight);
-                img.style.left = x + "px";
-                img.style.top = y + "px";
+            document.querySelectorAll(".bno-wrapper").forEach(wrapper => {
+                const x = Math.min(parseInt(wrapper.style.left), window.innerWidth - wrapper.offsetWidth);
+                const y = Math.min(parseInt(wrapper.style.top), window.innerHeight - wrapper.offsetHeight);
+                wrapper.style.left = x + "px";
+                wrapper.style.top = y + "px";
             });
         });
     </script>
