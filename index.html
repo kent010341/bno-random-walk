@@ -9,63 +9,72 @@
             margin: 0;
             overflow: hidden;
             background: #fff;
+            cursor: pointer;
         }
 
-        #bno {
+        .bno {
             position: absolute;
             width: 80px;
             height: auto;
+            pointer-events: none;
         }
     </style>
 </head>
 
 <body>
-    <img id="bno" src="assets/walk.gif" />
 
     <script>
-        const bno = document.getElementById('bno');
+        function createBno(x, y) {
+            const img = document.createElement("img");
+            img.src = "assets/walk.gif";
+            img.className = "bno";
+            document.body.appendChild(img);
 
-        let x = window.innerWidth / 2;
-        let y = window.innerHeight / 2;
+            let posX = x;
+            let posY = y;
 
-        const speed = 10;
-        const interval = 50;
+            const speed = 10;
+            const interval = 50 + Math.random() * 50;
 
-        function move() {
-            const angle = Math.random() * Math.PI * 2;
-            const dx = Math.cos(angle) * speed;
-            const dy = Math.sin(angle) * speed;
+            function move() {
+                const angle = Math.random() * Math.PI * 2;
+                const dx = Math.cos(angle) * speed;
+                const dy = Math.sin(angle) * speed;
+                posX += dx;
+                posY += dy;
 
-            x += dx;
-            y += dy;
+                const w = img.offsetWidth;
+                const h = img.offsetHeight;
 
-            const w = bno.offsetWidth;
-            const h = bno.offsetHeight;
+                if (posX < 0) posX = 0;
+                if (posY < 0) posY = 0;
+                if (posX + w > window.innerWidth) posX = window.innerWidth - w;
+                if (posY + h > window.innerHeight) posY = window.innerHeight - h;
 
-            if (x < 0) {
-                x = 0;
-            } else if (x + w > window.innerWidth) {
-                x = window.innerWidth - w;
+                img.style.left = posX + "px";
+                img.style.top = posY + "px";
             }
 
-            if (y < 0) {
-                y = 0;
-            } else if (y + h > window.innerHeight) {
-                y = window.innerHeight - h;
-            }
+            img.style.left = posX + "px";
+            img.style.top = posY + "px";
 
-            bno.style.left = x + "px";
-            bno.style.top = y + "px";
+            setInterval(move, interval);
         }
 
-        bno.style.left = x + "px";
-        bno.style.top = y + "px";
+        // create one BNO at init
+        createBno(window.innerWidth / 2, window.innerHeight / 2);
 
-        setInterval(move, interval);
+        document.addEventListener("click", (event) => {
+            createBno(event.clientX, event.clientY);
+        });
 
         window.addEventListener("resize", () => {
-            x = Math.min(x, window.innerWidth - bno.offsetWidth);
-            y = Math.min(y, window.innerHeight - bno.offsetHeight);
+            document.querySelectorAll(".bno").forEach(img => {
+                const x = Math.min(parseInt(img.style.left), window.innerWidth - img.offsetWidth);
+                const y = Math.min(parseInt(img.style.top), window.innerHeight - img.offsetHeight);
+                img.style.left = x + "px";
+                img.style.top = y + "px";
+            });
         });
     </script>
 
